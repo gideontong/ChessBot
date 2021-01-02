@@ -9,7 +9,7 @@ const { Chess } = require('chess.js');
  * @param {Array} args Arguments
  */
 module.exports = async (channel, message, args) => {
-    if (message.mentions.members.size == 1) {
+    if (message.mentions.members.size == 0) {
         return channel.send('You have to tag someone in the server to play against them!');
     } else if (message.mentions.members.size > 1) {
         return channel.send('You can only tag one person to play against in 2-player chess!');
