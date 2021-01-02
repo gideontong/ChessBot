@@ -1,3 +1,5 @@
+const timeout = 3 * 60;
+
 const { Chess } = require('chess.js');
 
 /**
@@ -18,25 +20,66 @@ module.exports = async (channel, message, args) => {
         return channel.send('Playing against a bot makes no sense... they don\'t have the ability to make moves.');
     }
     const chess = new Chess();
-    play(player1, player2, chess);
+    start(channel, player1, player2, chess);
 }
 
 /**
- * Main chess runtime
+ * Start chess runtime
  * @param {GuildMember} player1 White player
  * @param {GuildMember} player2 Black player
  * @param {Chess} chess Game board
  */
-function play(player1, player2, chess) {
+function start(channel, player1, player2, chess) {
     var interface = {
         title: '2 Player Chess Game',
         color: 0xF6D887,
-        description: generateDescription(player1, player2, chess),
+        description: '',
         footer: {
-            text: `History: ${chess.pgn()}`
+            text: 'Say a valid PGN move in chat in the next 3 minutes to use it.'
         }
     };
-    while (!chess.game_over())
+    if (!chess.game_over()) {
+        startTurn(channel, player1, player2, chess, interface, whiteToMove);
+    }
+}
+
+function startTurn(channel, player1, player2, chess, interface, whiteToMove) {
+    interface.description = generateDescription(player1, player2, chess, whiteToMove);
+    channel.send(interface)
+        .then(message => {
+            const filter = message => {
+                if (message.author.id == (whiteToMove ? player1.id : player2.id)) {
+                    if (chess.moves().includes(message.content.toLowerCase())) {
+                        return true;
+                    } else {
+                        channel.send('You have to provide a valid PGN move!');
+                        return false;
+                    }
+                } else {
+                    return false;
+                }
+            };
+            channel.awaitMessages(filter, { max: 1, time: timeout * 1000, errors: ['time'] })
+                .then(collected => {
+                    chess.move(message.content.toLowerCase());
+                    endTurn(channel, player1, player2, chess, interface, whiteToMove);
+                })
+                .catch(err => {
+                    channel.send('You ran out of time to make a move!');
+                    console.warn(`I may have gotten an error while running awaitMessages: ${err}`);
+                });
+        })
+        .catch(err => {
+            console.error(`Got error with runtime.startTurn: ${err}`);
+        });
+}
+
+function endTurn(channel, player1, player2, chess, interface, whiteToMove) {
+    if (!chess.game_over()) {
+        startTurn(channel, player1, player2, chess, interface, !whiteToMove);
+    } else {
+        channel.send('The game has ended.');
+    }
 }
 
 /**
