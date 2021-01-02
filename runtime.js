@@ -39,13 +39,13 @@ function start(channel, player1, player2, chess) {
         }
     };
     if (!chess.game_over()) {
-        startTurn(channel, player1, player2, chess, interface, whiteToMove);
+        startTurn(channel, player1, player2, chess, interface);
     }
 }
 
-function startTurn(channel, player1, player2, chess, interface, whiteToMove) {
+function startTurn(channel, player1, player2, chess, interface, whiteToMove = true) {
     interface.description = generateDescription(player1, player2, chess, whiteToMove);
-    channel.send(interface)
+    channel.send({ embed: interface })
         .then(message => {
             const filter = message => {
                 if (message.author.id == (whiteToMove ? player1.id : player2.id)) {
@@ -61,12 +61,17 @@ function startTurn(channel, player1, player2, chess, interface, whiteToMove) {
             };
             channel.awaitMessages(filter, { max: 1, time: timeout * 1000, errors: ['time'] })
                 .then(collected => {
-                    chess.move(message.content.toLowerCase());
+                    const move = collected.first().content.toLowerCase();
+                    chess.move(move);
                     endTurn(channel, player1, player2, chess, interface, whiteToMove);
                 })
                 .catch(err => {
                     channel.send('You ran out of time to make a move!');
-                    console.warn(`I may have gotten an error while running awaitMessages: ${err}`);
+                    if (err instanceof Map) {
+                        console.warn('User ran out of time while running runtime.startTurn.awaitMessages');
+                    } else {
+                        console.err(`I may have gotten an error while running runtime.startTrun.awaitMessages: ${err}`);
+                    }
                 });
         })
         .catch(err => {
