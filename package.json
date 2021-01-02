@@ -1,0 +1,27 @@
+{
+  "name": "newyearnewhack2021",
+  "version": "1.0.0",
+  "description": "New Year New Hacks Discord bot",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gideontong/NewYearNewHack2021.git"
+  },
+  "keywords": [
+    "Discord",
+    "chess"
+  ],
+  "author": "Gideon Tong <gideon@gideontong.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/gideontong/NewYearNewHack2021/issues"
+  },
+  "homepage": "https://github.com/gideontong/NewYearNewHack2021#readme",
+  "dependencies": {
+    "chess.js": "^0.11.0",
+    "discord.js": "^12.5.1"
+  }
+}
