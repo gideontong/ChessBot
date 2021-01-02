@@ -49,7 +49,7 @@ function startTurn(channel, player1, player2, chess, interface, whiteToMove = tr
         .then(message => {
             const filter = message => {
                 if (message.author.id == (whiteToMove ? player1.id : player2.id)) {
-                    if (chess.moves().includes(message.content.toLowerCase())) {
+                    if (chess.moves().includes(message.content)) {
                         return true;
                     } else {
                         channel.send('You have to provide a valid PGN move!');
@@ -61,7 +61,7 @@ function startTurn(channel, player1, player2, chess, interface, whiteToMove = tr
             };
             channel.awaitMessages(filter, { max: 1, time: timeout * 1000, errors: ['time'] })
                 .then(collected => {
-                    const move = collected.first().content.toLowerCase();
+                    const move = collected.first().content;
                     chess.move(move);
                     endTurn(channel, player1, player2, chess, interface, whiteToMove);
                 })
